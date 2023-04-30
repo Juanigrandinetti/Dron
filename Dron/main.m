@@ -36,7 +36,7 @@ dron1_gananciasControlador = containers.Map(...
      'P_psi', 'I_psi', 'D_psi', ...
      'P_zdot', 'I_zdot', 'D_zdot', ...
      'P_z', 'I_z', 'D_z'}, ...
-    {0.0, 0.0, 0.0, ...
+    {1.0, 0.0, 1.0, ...
      0.0, 0.0, 0.0, ...
      0.0, 0.0, 0.0, ...
      10.0, 0.0, 0.0, ...
@@ -116,16 +116,17 @@ title('z[m]');
 grid on;
 hold on;
 %% 
-commandSigAlt(1) = 0.0 * D2R;
-commandSigAlt(2) = 0.0 * D2R;
-commandSigAlt(3) = 0.0 * D2R;
-commandSigAlt(4) = 1.0;
+%commandSigAlt(1) = 0.0 * D2R;
+%commandSigAlt(2) = 0.0 * D2R;
+%commandSigAlt(3) = 0.0 * D2R;
+commandSigAlt = 1.0;
 
-commandSigPos(1) = 0;
-commandSigPos(2) = 0;
+commandSigPos(1) = 2;
+commandSigPos(2) = 2;
 commandSigPos(3) = -8;
 
 for i = 1:tiemposimulacion/0.01
+%   dron1.PosCtrl(commandSigPos);
     dron1.altitudCtrl(commandSigAlt);
     dron1.PosCtrl(commandSigPos);
     % El dron actualiza su estado en función de los torques y la
