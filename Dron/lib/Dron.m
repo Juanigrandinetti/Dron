@@ -42,6 +42,11 @@ classdef Dron < handle
         zdot_err_prev
         zdot_err_sum
 
+        z_ref
+        z_err
+        z_err_prev
+        z_err_sum
+
         kP_phi
         kI_phi
         kD_phi
@@ -56,7 +61,11 @@ classdef Dron < handle
 
         kP_zdot
         kI_zdot
-        kD_zdot 
+        kD_zdot
+
+        kP_z
+        kI_z
+        kD_z 
     end
 
     %% Métodos
@@ -111,6 +120,11 @@ classdef Dron < handle
             obj.zdot_err_prev = 0.0;
             obj.zdot_err_sum = 0.0;
 
+            obj.z_ref = 0.0;
+            obj.z_err = 0.0;
+            obj.z_err_prev = 0.0;
+            obj.z_err_sum = 0.0;
+
             obj.kP_phi = gananciasControlador('P_phi');
             obj.kI_phi = gananciasControlador('I_phi');
             obj.kD_phi = gananciasControlador('D_phi');
@@ -125,7 +139,11 @@ classdef Dron < handle
 
             obj.kP_zdot = gananciasControlador('P_zdot');
             obj.kI_zdot = gananciasControlador('I_zdot');
-            obj.kD_zdot = gananciasControlador('I_zdot');
+            obj.kD_zdot = gananciasControlador('D_zdot');
+
+            obj.kP_z = gananciasControlador('P_z');
+            obj.kI_z = gananciasControlador('I_z');
+            obj.kD_z = gananciasControlador('D_z');
 
         end
         
@@ -173,10 +191,6 @@ classdef Dron < handle
         
         %% Controlador
         function obj = altitudCtrl(obj, yawReferencia)
-            %obj.u(1) = obj.m*obj.g; % Los motores compensan la gravedad
-            %obj.u(2) = 0.1;
-            %obj.u(3) = 0.0;
-            %obj.u(4) = 0.0;
             
             obj.phi_ref = yawReferencia(1);
             obj.theta_ref = yawReferencia(2);
@@ -211,16 +225,30 @@ classdef Dron < handle
             obj.psi_err_sum = obj.psi_err_sum + obj.psi_err;
             
             obj.u(1) = obj.m * obj.g - ((obj.kP_zdot * obj.zdot_err + ...
-                        obj.kI_zdot * obj.zdot_err_sum + ...
-                        obj.kD_zdot * (obj.zdot_err - obj.zdot_err_prev)/obj.dt));
+                       obj.kI_zdot * obj.zdot_err_sum + ...
+                       obj.kD_zdot * (obj.zdot_err - obj.zdot_err_prev)/obj.dt));
 
             obj.zdot_err_prev = obj.zdot_err;
             obj.zdot_err_sum = obj.zdot_err_sum + obj.zdot_err;
             
-            %obj.u(1) = obj.m * obj.g; 
             obj.u(2:4) = [0;0;0];
             obj.T = obj.u(1);
             obj.M = obj.u(2:4);
+        end
+
+        function obj = PosCtrl(obj, posReferencia)
+            obj.z_ref = posReferencia(3);
+
+            obj.z_err = obj.z_ref - obj.r(3);
+
+            obj.u(1) = obj.m * obj.g - ((obj.kP_z * obj.z_err + ...
+                       obj.kI_z * obj.z_err_sum + ...
+                       obj.kD_z * (obj.z_err - obj.z_err_prev)/obj.dt));
+
+            obj.z_err_prev = obj.z_err;
+            obj.z_err_sum = obj.z_err_sum + obj.z_err;
+
+            obj.T = obj.u(1);
         end
     end
 end
