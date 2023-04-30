@@ -13,7 +13,7 @@ D2R = pi/180;
 dron1_param = containers.Map({'Masa', 'longBrazo', 'Ixx', 'Iyy', 'Izz'}, ...
     {1.25, 0.265, 0.0232, 0.0232, 0.0468});
 
-dron1_estadoInicial = [0, 0, -8, ... %x, y, z
+dron1_estadoInicial = [0, 0, -4, ... %x, y, z
     0, 0, 0, ...                    %vx, vy, vz
     0, 0, 0, ...                    %phi, theta, psi [Ángulos de Euler]
     0, 0, 0]';                      %p, q, r [velocidad angular en el sistema de referencia solidario al dron]
@@ -32,13 +32,15 @@ dron1_cuerpo = [0.0265,      0,     0, 1; ...
 
 dron1_gananciasControlador = containers.Map(...
     {'P_phi', 'I_phi', 'D_phi', ...
-    'P_theta', 'I_theta', 'D_theta', ...
-    'P_psi', 'I_psi', 'D_psi', ...
-    'P_zdot', 'I_zdot', 'D_zdot'}, ...
+     'P_theta', 'I_theta', 'D_theta', ...
+     'P_psi', 'I_psi', 'D_psi', ...
+     'P_zdot', 'I_zdot', 'D_zdot', ...
+     'P_z', 'I_z', 'D_z'}, ...
     {0.0, 0.0, 0.0, ...
      0.0, 0.0, 0.0, ...
      0.0, 0.0, 0.0, ...
-     10.0, 0.0, 0.0});
+     10.0, 0.0, 0.0, ...
+     1.0, 0.0, 8.0});
 
 tiemposimulacion = 10;
 dron1 = Dron(dron1_param, dron1_estadoInicial, dron1_entradaInicial, dron1_gananciasControlador, tiemposimulacion);
@@ -114,13 +116,18 @@ title('z[m]');
 grid on;
 hold on;
 %% 
-commandSig(1) = 0.0 * D2R;
-commandSig(2) = 0.0 * D2R;
-commandSig(3) = 0.0 * D2R;
-commandSig(4) = 1.0;
+commandSigAlt(1) = 0.0 * D2R;
+commandSigAlt(2) = 0.0 * D2R;
+commandSigAlt(3) = 0.0 * D2R;
+commandSigAlt(4) = 1.0;
+
+commandSigPos(1) = 0;
+commandSigPos(2) = 0;
+commandSigPos(3) = -8;
 
 for i = 1:tiemposimulacion/0.01
-    dron1.altitudCtrl(commandSig);
+    dron1.altitudCtrl(commandSigAlt);
+    dron1.PosCtrl(commandSigPos);
     % El dron actualiza su estado en función de los torques y la
     % propulsión (thrsut)
     dron1.updateEstado();
