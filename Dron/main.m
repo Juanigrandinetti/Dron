@@ -36,14 +36,14 @@ dron1_gananciasControlador = containers.Map(...
      'P_psi', 'I_psi', 'D_psi', ...
      'P_zdot', 'I_zdot', 'D_zdot', ...
      'P_z', 'I_z', 'D_z'}, ...
-    {1.0, 0.0, 1.0, ...
+    {0.0, 0.0, 0.0, ...
      0.0, 0.0, 0.0, ...
      0.0, 0.0, 0.0, ...
      10.0, 0.0, 0.0, ...
      1.0, 0.0, 8.0});
 
 tiemposimulacion = 10;
-dron1 = Dron(dron1_param, dron1_estadoInicial, dron1_entradaInicial, dron1_gananciasControlador, tiemposimulacion);
+dron1 = Dron3(dron1_param, dron1_estadoInicial, dron1_entradaInicial, dron1_gananciasControlador, tiemposimulacion);
 
 %% Definimos el espacio en 3D
 fig1 = figure('pos', [0 200 800 800]);
@@ -60,6 +60,7 @@ xlabel('X[m]'); ylabel('Y[m]'); zlabel('Z[m]');
 
 hold(gca, 'on');
 
+dron1_motor = dron1.getMotor();
 % Obtenemos las variables de estado
 dron1_estado = dron1.getEstado();
 % Matriz homogénea
@@ -86,47 +87,62 @@ fig1_sombra = plot3(gca,0,0,0,'xk','LineWidth',3);
 hold(gca, 'off');
 
 %% Definimos datos de la figura
-fig2 = figure('pos',[800 500 800 500]);
-subplot(3,3,1);
+fig2 = figure('pos',[800 300 800 700]);
+subplot(4,4,1);
 title('phi[deg]');
 grid on;
 hold on;
-subplot(3,3,2);
+subplot(4,4,2);
 title('theta[deg]');
 grid on;
 hold on;
-subplot(3,3,3);
+subplot(4,4,3);
 title('psi[deg]');
 grid on;
 hold on;
-subplot(3,3,4);
+subplot(4,4,4);
 title('x[m]');
 grid on;
 hold on;
-subplot(3,3,5);
+subplot(4,4,5);
 title('y[m]');
 grid on;
 hold on;
-subplot(3,3,6);
+subplot(4,4,6);
 title('zdot[m/s]');
 grid on;
 hold on;
-subplot(3,3,7);
+subplot(4,4,7);
 title('z[m]');
 grid on;
 hold on;
+subplot(4,4,8);
+title('w1');
+grid on;
+hold on;
+subplot(4,4,9);
+title('w2');
+grid on;
+hold on;
+subplot(4,4,10);
+title('w3');
+grid on;
+hold on;
+subplot(4,4,11);
+title('w4');
+grid on;
+hold on;
 %% 
-%commandSigAlt(1) = 0.0 * D2R;
-%commandSigAlt(2) = 0.0 * D2R;
-%commandSigAlt(3) = 0.0 * D2R;
-commandSigAlt = 1.0;
+commandSigAlt(1) = 0.0 * D2R;
+commandSigAlt(2) = 0.0 * D2R;
+commandSigAlt(3) = 0.0 * D2R;
+commandSigAlt(4) = 1.0;
 
-commandSigPos(1) = 2;
-commandSigPos(2) = 2;
+commandSigPos(1) = 0;
+commandSigPos(2) = 0;
 commandSigPos(3) = -8;
 
 for i = 1:tiemposimulacion/0.01
-%   dron1.PosCtrl(commandSigPos);
     dron1.altitudCtrl(commandSigAlt);
     dron1.PosCtrl(commandSigPos);
     % El dron actualiza su estado en función de los torques y la
@@ -134,7 +150,7 @@ for i = 1:tiemposimulacion/0.01
     dron1.updateEstado();
 
     dron1_estado = dron1.getEstado();
-
+    dron1_motor = dron1.getMotor();
     %% Gráfico 3D
     figure(1);
     wHb = [RPY2Rot(dron1_estado(7:9))' dron1_estado(1:3); 0 0 0 1];
@@ -162,20 +178,28 @@ for i = 1:tiemposimulacion/0.01
         'ZData', 0);
     
     figure(2)
-    subplot(3,3,1);
+    subplot(4,4,1);
         plot(i/100, dron1_estado(7)*R2D, '.');
-    subplot(3,3,2);
+    subplot(4,4,2);
         plot(i/100, dron1_estado(8)*R2D, '.');
-    subplot(3,3,3);
+    subplot(4,4,3);
         plot(i/100, dron1_estado(9)*R2D, '.');
-    subplot(3,3,4);
+    subplot(4,4,4);
         plot(i/100, dron1_estado(1), '.');
-    subplot(3,3,5);
+    subplot(4,4,5);
         plot(i/100, dron1_estado(2), '.');
-    subplot(3,3,6);
+    subplot(4,4,6);
         plot(i/100, dron1_estado(6), '.');
-    subplot(3,3,7);
+    subplot(4,4,7);
         plot(i/100, dron1_estado(3), '.');
+    subplot(4,4,8);
+        plot(i/100, dron1.W(1), '.');
+    subplot(4,4,9);
+        plot(i/100, dron1.W(2), '.');
+    subplot(4,4,10);
+        plot(i/100, dron1.W(3), '.');
+    subplot(4,4,11);
+        plot(i/100, dron1.W(4), '.');
 
     drawnow;
     if(dron1_estado(3) >= 0)
@@ -183,7 +207,6 @@ for i = 1:tiemposimulacion/0.01
         break;
     end
 end
-
 
 
 
