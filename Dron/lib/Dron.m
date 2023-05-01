@@ -1,5 +1,5 @@
 %%%% Creamos una clase para poder modificar los parámetros del dron.
-classdef Dron < handle
+classdef Dron3 < handle
 
     %% Miembros
     properties
@@ -19,6 +19,10 @@ classdef Dron < handle
         u %Vector de control [T, M1, M2, M3]'
         T %Total thrust
         M %[M1, M2, M3]' = [tx, ty, tz]'
+        W %Velocidad angular de los motores
+        Kt %Thrust coefficient --> Kt = 1.75x10^-5 kg/m^(3)
+        Kq %Torque coefficient --> Kq = 2.74x10^(-7) kg*m^(2)
+
     end
 
     properties  
@@ -47,16 +51,6 @@ classdef Dron < handle
         z_err_prev
         z_err_sum
 
-        y_ref
-        y_err
-        y_err_prev
-        y_err_sum
-
-        x_ref
-        x_err
-        x_err_prev
-        x_err_sum
-
         kP_phi
         kI_phi
         kD_phi
@@ -83,11 +77,13 @@ classdef Dron < handle
         %% Constructor (es un inicializador)
         %% Desde "main.m" se pueden crear objetos de tipo "Dron" con todos
         %% los atributos asociados a dicho objeto.
-        function obj = Dron(param, estadoInicial, entradaInicial, gananciasControlador, tiempoSimulacion)
+        function obj = Dron3(param, estadoInicial, entradaInicial, gananciasControlador, tiempoSimulacion)
             obj.g = 9.81;
             obj.t = 0.0;
             obj.dt = 0.01;
             obj.tf = tiempoSimulacion;
+            obj.Kt = 1.75*10^(-5);
+            obj.Kq = 2.74*10^(-7);
 
             obj.m = param('Masa');
             obj.l = param('longBrazo');
@@ -109,6 +105,7 @@ classdef Dron < handle
             obj.u = entradaInicial;
             obj.T = obj.u(1);
             obj.M = obj.u(2:4);
+            obj.W = [0;0;0;0];
 
             obj.phi_ref = 0.0;
             obj.phi_err = 0.0;
@@ -134,16 +131,6 @@ classdef Dron < handle
             obj.z_err = 0.0;
             obj.z_err_prev = 0.0;
             obj.z_err_sum = 0.0;
-
-            obj.y_ref = 0.0;
-            obj.y_err = 0.0;
-            obj.y_err_prev = 0.0;
-            obj.y_err_sum = 0.0;
-
-            obj.x_ref = 0.0;
-            obj.x_err = 0.0;
-            obj.x_err_prev = 0.0;
-            obj.x_err_sum = 0.0;
 
             obj.kP_phi = gananciasControlador('P_phi');
             obj.kI_phi = gananciasControlador('I_phi');
@@ -171,8 +158,20 @@ classdef Dron < handle
         function estado = getEstado(obj)
             estado = obj.x;
         end
-
+            
+        function motor = getMotor(obj)
+            motor = obj.W;
+        end
+            
         function obj = evalEOM(obj)
+            % Calculamos la velocidad de cada motor en función de la
+            % propulsión total (T) y de los torques (M1, M2, M3) 
+            % en cada eje.
+            obj.W = [sqrt((obj.u(1))/(4*obj.Kt) + (obj.u(4))/(4*obj.Kq) + (obj.u(3))/(2*obj.Kt*obj.l)); ...
+                     sqrt((obj.u(1))/(4*obj.Kt) - (obj.u(4))/(4*obj.Kq) + (obj.u(2))/(2*obj.Kt*obj.l)); ...
+                     sqrt((obj.u(1))/(4*obj.Kt) + (obj.u(4))/(4*obj.Kq) - (obj.u(3))/(2*obj.Kt*obj.l)); ...
+                     sqrt((obj.u(1))/(4*obj.Kt) - (obj.u(4))/(4*obj.Kq) - (obj.u(2))/(2*obj.Kt*obj.l))];
+
             % Cálculo de la velocidad, lineal y angular, y de la
             % aceleración, lineal y angular.
             bRi = RPY2Rot(obj.euler);
@@ -180,7 +179,7 @@ classdef Dron < handle
 
             obj.dx(1:3) = obj.dr; % Velocidad lineal
             obj.dx(4:6) = 1 / obj.m * ([0; 0; obj.m*obj.g] + R * obj.T * [0; 0; -1]); % Aceleración lineal
-
+            
             phi = obj.euler(1); theta = obj.euler(2);
 
             %% Ahora obtenemos la derivada de los ángulos (phi punto, theta punto, psi punto)
@@ -212,10 +211,10 @@ classdef Dron < handle
         %% Controlador
         function obj = altitudCtrl(obj, yawReferencia)
             
-%            obj.phi_ref = yawReferencia(1);
-%            obj.theta_ref = yawReferencia(2);
-%            obj.psi_ref = yawReferencia(3);
-            obj.zdot_ref = yawReferencia;
+            obj.phi_ref = yawReferencia(1);
+            obj.theta_ref = yawReferencia(2);
+            obj.psi_ref = yawReferencia(3);
+            obj.zdot_ref = yawReferencia(4);
             
             % Error = 'valor que quiero' - 'valor sensado'.
             obj.phi_err = obj.phi_ref - obj.euler(1);
@@ -251,28 +250,15 @@ classdef Dron < handle
             obj.zdot_err_prev = obj.zdot_err;
             obj.zdot_err_sum = obj.zdot_err_sum + obj.zdot_err;
             
+            obj.u(2:4) = [0;0;0];
             obj.T = obj.u(1);
             obj.M = obj.u(2:4);
         end
 
         function obj = PosCtrl(obj, posReferencia)
             obj.z_ref = posReferencia(3);
-            obj.y_ref = posReferencia(2);
-            obj.x_ref = posReferencia(1);
-            
+
             obj.z_err = obj.z_ref - obj.r(3);
-            obj.y_err = obj.y_ref - obj.r(2);
-            obj.x_err = obj.x_ref - obj.r(1);
-
-            obj.psi_ref = atan(obj.y_ref / obj.x_ref);
-
-            obj.theta_ref = obj.kP_theta * obj.x_err + ...
-                            obj.kI_theta * obj.x_err_sum + ...
-                            obj.kD_theta * (obj.x_err - obj.x_err_prev)/obj.dt;
-            
-            obj.phi_ref = obj.kP_phi * obj.y_err + ...
-                            obj.kI_phi * obj.y_err_sum + ...
-                            obj.kD_phi * (obj.y_err - obj.y_err_prev)/obj.dt;
 
             obj.u(1) = obj.m * obj.g - ((obj.kP_z * obj.z_err + ...
                        obj.kI_z * obj.z_err_sum + ...
