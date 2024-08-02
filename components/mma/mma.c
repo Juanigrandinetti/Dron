@@ -4,13 +4,13 @@
 
 static float get_dc( float pid_e )
 {
-    if ( pid_e > 10 )
-        return 10;
+    if ( pid_e > MAX_DC )
+        return MAX_DC;
 
     else
     {
-        if ( pid_e < 5.8 )
-            return 5.8;
+        if ( pid_e < MIN_DC )
+            return MIN_DC;
 
         else
             return pid_e;

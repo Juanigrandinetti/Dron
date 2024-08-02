@@ -3,6 +3,7 @@
 
 
 #include <estructuras.h>
+#include <pwm.h>
 
 
 void new_mma( struct Mma* self );
