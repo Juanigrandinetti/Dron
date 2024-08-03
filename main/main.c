@@ -18,7 +18,7 @@
  ************************************
 */
 
-
+SemaphoreHandle_t GlobalKey = 0;
 Dron dron; // Esta variable se usa para crear una instancia de un objeto de clase Dron.
 
 
@@ -47,6 +47,8 @@ void vTaskMoveDron( void * pvParameters );
 
 void app_main( void )
 {
+    GlobalKey = xSemaphoreCreateBinary();
+
     /*
     * Instanciar objetos
     * ------------------
@@ -125,7 +127,12 @@ void vTaskPrintStates( void * pvParameters )
 {
     while ( 1 )
     {
-        ESP_LOGI( TAG, "Distancia: %.2fcm", dron.z );
+        if ( xSemaphoreTake( GlobalKey, portMAX_DELAY ) )
+        {
+            printf( "Llave recibida, iniciando Task print.\n" );
+            ESP_LOGI( TAG, "Distancia: %.2fcm", dron.z );
+        }
+        printf( "Task print hivernando.\n" );
         vTaskDelay( pdMS_TO_TICKS( 500 ) );
     }
     
@@ -136,8 +143,11 @@ void vTaskUpdateDistance( void * pvParameters )
 {
     while ( 1 )
     {
+        printf( "Iniciando Task datos.\n" );
         dron.update_distance( &dron );
-        vTaskDelay( pdMS_TO_TICKS( 500 ) );
+        xSemaphoreGive( GlobalKey );
+        vTaskDelay( pdMS_TO_TICKS( 1000 ) );
+        printf( "Entregando llave.\n" );
     }
     
 }

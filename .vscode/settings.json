@@ -77,7 +77,9 @@
         "change_mac.h": "c",
         "math.h": "c",
         "mma.h": "c",
-        "dron.h": "c"
+        "dron.h": "c",
+        "semphr.h": "c",
+        "freertosconfig.h": "c"
     },
     "C_Cpp.errorSquiggles": "enabled"
 }
