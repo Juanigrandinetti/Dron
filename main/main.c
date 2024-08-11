@@ -76,9 +76,9 @@ void app_main( void )
     * 
     * Ejecutar tareas asociadas a
     * 
-    * => Actualizar los estados del dron.
-    * => Actualizar los controladores PID.
-    * => Actualizar el DC de cada motor.
+    * => Actualizar variables de estado.
+    * => Actualizar controladores PID.
+    * => Actualizar DC de cada motor.
     * 
     * */
     esp_err_t res = TasksDron();
