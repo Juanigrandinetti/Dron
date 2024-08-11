@@ -12,9 +12,9 @@ init_error_t pwm_init( struct Pwm* self )
     /*
     Nombre: "mcpwm_gpio_init".
     Inicializar la señal PWM "0" de la unidad "A".
-    MCPWM_UNIT_0: elección del canal (opciones: 0/1).
-    MCPWM0A: setear la señal PWM (opciones: 6 salidas PWM por cada unidad (A/B).
-    GPIO_PWM: pin PWM a utilizar ().
+    mcpwm_num: elección del canal (opciones: 0/1).
+    io_signal: setear la señal PWM (opciones: 6 salidas PWM por cada unidad (A/B).
+    gpio_num: pin PWM a utilizar.
     */
 
     if ( mcpwm_gpio_init( self->unit, self->generator, self->gpio ) != ESP_OK )
@@ -30,9 +30,9 @@ init_error_t pwm_init( struct Pwm* self )
     /*
     Nombre: "mcpwm_init".
     Inicializar parámetros MCPWM.
-    MCPWM_UNIT_0: elección del canal (opciones: 0/1).
-    MCPWM_TIMER_0: elección del timer  (opciones: 0/1/2), cada unidad (A/B) posee 3 timers asociados.
-    pwm_config: estructura con configuraciones PWM.
+    mcpwm_num: elección del canal (opciones: 0/1).
+    timer_num: elección del timer  (opciones: 0/1/2), cada unidad (A/B) posee 3 timers asociados.
+    mcpwm_conf: estructura con configuraciones PWM.
     */
 
     ESP_LOGI( TAG, "Inicializando unidades PWM..." );
@@ -85,10 +85,21 @@ void update_DC( struct Mma* mma, struct Pwm ( *motores )[ 4 ] )
 
 void new_pwm( Pwm* self, int gpio, mcpwm_unit_t unit, mcpwm_timer_t timer, mcpwm_generator_t generator )
 {
+    /*
+    * Atributos
+    * ---------
+    * 
+    * */
     self->gpio = gpio;
     self->unit = unit;
     self->timer = timer;
     self->generator = generator;
+
+    /*
+    * Métodos
+    * -------
+    * 
+    * */
     self->init = pwm_init;
     self->increase_dc = increase_dc;
     self->decrease_dc = decrease_dc;

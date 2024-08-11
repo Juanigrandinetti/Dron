@@ -13,7 +13,8 @@ void get_mac_address( struct Mac* self )
 {
     uint8_t mac[ MAC_ADDR_SIZE ];
     esp_wifi_get_mac( ESP_IF_WIFI_STA, mac );
-    printf( "[MAC ADDRESS] Dirección MAC original: %02x:%02x:%02x:%02x:%02x:%02x\n", mac[ 0 ], mac[ 1 ], mac[ 2 ], mac[ 3 ], mac[ 4 ], mac[ 5 ] );
+    ESP_LOGI( TAG, "Dirección MAC original: %02x:%02x:%02x:%02x:%02x:%02x\n",
+        mac[ 0 ], mac[ 1 ], mac[ 2 ], mac[ 3 ], mac[ 4 ], mac[ 5 ] );
 }
 
 /*
@@ -29,8 +30,8 @@ init_error_t set_mac_address( struct Mac* self, uint8_t *mac )
     if ( err == ESP_OK )
     {
         fflush( stdout );
-        printf( "[MAC ADDRESS] La dirección MAC de la placa ESP32 ha sido actualizada satisfactoriamente!\n[MAC ADDRESS] Nueva dirección MAC: %02x:%02x:%02x:%02x:%02x:%02x\n",
-        mac[ 0 ], mac[ 1 ], mac[ 2 ], mac[ 3 ], mac[ 4 ], mac[ 5 ] );
+        ESP_LOGI( TAG, "Nueva dirección MAC: %02x:%02x:%02x:%02x:%02x:%02x\n",
+            mac[ 0 ], mac[ 1 ], mac[ 2 ], mac[ 3 ], mac[ 4 ], mac[ 5 ] );
 
         return INIT_OK;
     }

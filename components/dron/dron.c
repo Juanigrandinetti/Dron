@@ -109,10 +109,21 @@ init_error_t state( struct Dron* self )
 
 void new_dron( struct Dron* self )
 {
+    /*
+    * Atributos
+    * ---------
+    * 
+    * */
     self->z = 0;
     self->roll = 0;
     self->pitch = 0;
     self->yaw = 0;
+
+    /*
+    * Métodos
+    * -------
+    * 
+    * */
     self->init = dron_init;
     self->update_distance = update_distance;
     self->update_angles = update_angles;

@@ -33,7 +33,7 @@ extern Setpoint sp;
 void new_pid( struct Pid* self, float kp, float ki, float kd );
 void new_sp( struct Setpoint* self );
 float get_pid( struct Pid* self, float error );
-void update_pid( struct Pid ( *pid )[ 4 ], struct Mma* mma, float z, float roll, float pitch, float yaw );
+void update_pid( struct Pid ( *pid )[ 4 ], struct Mma* mma, struct Dron* dron );
 
 
 #endif

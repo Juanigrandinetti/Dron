@@ -59,7 +59,7 @@ init_error_t joystick_init( struct Joystick *self )
 
     mac.nvs_init( &mac );
     mac.get_mac_address( &mac );
-    init_error_t set_mac = set_mac_address( &mac, self->mac );
+    init_error_t set_mac = mac.set_mac_address( &mac, self->mac );
     if( set_mac != INIT_OK )
         return set_mac;
     ps3SetEventCallback( controller_event_cb );
@@ -78,8 +78,18 @@ init_error_t joystick_init( struct Joystick *self )
 
 void new_joystick( struct Joystick *self, const uint8_t mac_address[ MAC_ADDR_SIZE ] )
 {
+    /*
+    * Atributos
+    * ---------
+    * 
+    * */
     for ( int i = 0; i < MAC_ADDR_SIZE; i++ )
         self->mac[ i ] = mac_address[ i ];
     
+    /*
+    * Métodos
+    * -------
+    * 
+    * */
     self->joystick_init = joystick_init;
 }

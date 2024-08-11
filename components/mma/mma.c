@@ -39,6 +39,11 @@ void update_dc( struct Mma* self )
 
 void new_mma( struct Mma* self )
 {
+    /*
+    * Atributos
+    * ---------
+    * 
+    * */
     self->pid_z = 0;
     self->pid_roll = 0;
     self->pid_pitch = 0;
@@ -47,5 +52,11 @@ void new_mma( struct Mma* self )
     self->dc2 = 0;
     self->dc3 = 0;
     self->dc4 = 0;
+
+    /*
+    * Métodos
+    * -------
+    * 
+    * */
     self->update_dc = update_dc;
 }
