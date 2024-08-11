@@ -44,14 +44,14 @@ void new_mma( struct Mma* self )
     * ---------
     * 
     * */
-    self->pid_z = 0;
-    self->pid_roll = 0;
+    self->pid_z     = 0;
+    self->pid_roll  = 0;
     self->pid_pitch = 0;
-    self->pid_yaw = 0;
-    self->dc1 = 0;
-    self->dc2 = 0;
-    self->dc3 = 0;
-    self->dc4 = 0;
+    self->pid_yaw   = 0;
+    self->dc1       = 0;
+    self->dc2       = 0;
+    self->dc3       = 0;
+    self->dc4       = 0;
 
     /*
     * Métodos

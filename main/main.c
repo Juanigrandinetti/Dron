@@ -28,14 +28,10 @@ Dron dron; // Esta variable se usa para crear una instancia de un objeto de clas
  ************************************
 */
 
+
 esp_err_t TasksDron( void );
 void vTaskPrintStates( void * pvParameters );
 void vTaskUpdateDistance( void * pvParameters );
-
-/*
-esp_err_t move_task( void );
-void vTaskMoveDron( void * pvParameters );
-*/
 
 
 /*

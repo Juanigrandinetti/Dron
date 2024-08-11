@@ -22,9 +22,9 @@ init_error_t pwm_init( struct Pwm* self )
 
     ESP_LOGI( TAG, "GPIO PWM inicializados." );
 
-    self->cfg.frequency = FREQUENCY;
-    self->cfg.cmpr_a = MIN_DC;
-    self->cfg.duty_mode = MCPWM_DUTY_MODE_0;
+    self->cfg.frequency    = FREQUENCY;
+    self->cfg.cmpr_a       = MIN_DC;
+    self->cfg.duty_mode    = MCPWM_DUTY_MODE_0;
     self->cfg.counter_mode = MCPWM_UP_COUNTER;
     
     /*
@@ -90,9 +90,9 @@ void new_pwm( Pwm* self, int gpio, mcpwm_unit_t unit, mcpwm_timer_t timer, mcpwm
     * ---------
     * 
     * */
-    self->gpio = gpio;
-    self->unit = unit;
-    self->timer = timer;
+    self->gpio      = gpio;
+    self->unit      = unit;
+    self->timer     = timer;
     self->generator = generator;
 
     /*
@@ -100,7 +100,7 @@ void new_pwm( Pwm* self, int gpio, mcpwm_unit_t unit, mcpwm_timer_t timer, mcpwm
     * -------
     * 
     * */
-    self->init = pwm_init;
+    self->init        = pwm_init;
     self->increase_dc = increase_dc;
     self->decrease_dc = decrease_dc;
 }

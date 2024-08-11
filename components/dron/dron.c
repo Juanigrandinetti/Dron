@@ -114,19 +114,19 @@ void new_dron( struct Dron* self )
     * ---------
     * 
     * */
-    self->z = 0;
-    self->roll = 0;
+    self->z     = 0;
+    self->roll  = 0;
     self->pitch = 0;
-    self->yaw = 0;
+    self->yaw   = 0;
 
     /*
     * Métodos
     * -------
     * 
     * */
-    self->init = dron_init;
+    self->init            = dron_init;
     self->update_distance = update_distance;
-    self->update_angles = update_angles;
-    self->updatedc = updatedc;
-    self->state = state;
+    self->update_angles   = update_angles;
+    self->updatedc        = updatedc;
+    self->state           = state;
 }

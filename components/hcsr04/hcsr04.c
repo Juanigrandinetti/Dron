@@ -102,8 +102,8 @@ void new_hcsr04( Hcsr04* self, int trig, int echo )
     * ---------
     * 
     * */
-    self->trig = trig;
-    self->echo = echo;
+    self->trig      = trig;
+    self->echo      = echo;
     self->distancia = 0;
 
     /*
@@ -111,6 +111,6 @@ void new_hcsr04( Hcsr04* self, int trig, int echo )
     * -------
     * 
     * */
-    self->init = hcsr04_init;
+    self->init         = hcsr04_init;
     self->get_distance = get_distance;
 }

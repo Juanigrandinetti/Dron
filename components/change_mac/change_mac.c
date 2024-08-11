@@ -70,7 +70,7 @@ void nvs_ini( struct Mac* self )
 
 void new_mac( Mac* self )
 {
-    self->nvs_init = nvs_ini;
+    self->nvs_init        = nvs_ini;
     self->get_mac_address = get_mac_address;
     self->set_mac_address = set_mac_address;
 }

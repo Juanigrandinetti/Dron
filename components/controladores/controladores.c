@@ -57,9 +57,9 @@ void new_pid( struct Pid* self, float kp, float ki, float kd )
     * -------
     * 
     * */
-    self->integral = 0;
+    self->integral   = 0;
     self->update_pid = update_pid;
-    self->get_pid = get_pid;
+    self->get_pid    = get_pid;
 }
 
 
@@ -70,8 +70,8 @@ void new_sp( struct Setpoint* self )
     * ---------
     * 
     * */
-    self->z = 0;
-    self->roll = 0;
+    self->z     = 0;
+    self->roll  = 0;
     self->pitch = 0;
-    self->yaw = 0;
+    self->yaw   = 0;
 }
