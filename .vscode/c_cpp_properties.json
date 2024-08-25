@@ -28,7 +28,8 @@
                     "${workspaceFolder}"
                 ],
                 "limitSymbolsToIncludedHeaders": false
-            }
+            },
+            "intelliSenseMode": "gcc-x64"
         },
         {
             "name": "s",

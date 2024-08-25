@@ -23,7 +23,8 @@ void controller_event_cb( ps3_t ps3, ps3_event_t event )
 
     if ( ps3.analog.button.down )
     {
-        sp.z = sp.z - 0.1;
+        if ( sp.z - 0.1 > 0 )
+            sp.z = sp.z - 0.1;
         motores[ 0 ].decrease_dc( &motores[ 0 ] );
     }
     

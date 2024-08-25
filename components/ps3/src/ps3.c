@@ -296,7 +296,6 @@ void ps3SetBluetoothMacAddress( const uint8_t *mac )
 
 void ps3_connect_event( uint8_t is_connected )
 {
-    printf("Entrando a ps3_connect_event.\n");
     if(is_connected){
         ps3Enable();
     }else{

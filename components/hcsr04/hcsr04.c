@@ -91,7 +91,7 @@ float get_distance( struct Hcsr04* self )
             return -1;
         }
         else
-            return ( 1.0 * time ) * ( V_SONIDO / 2 );
+            return ( ( 1.0 * time ) * ( V_SONIDO / 2 ) / 100 );
 }
 
 

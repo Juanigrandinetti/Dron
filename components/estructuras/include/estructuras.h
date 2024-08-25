@@ -4,6 +4,8 @@
 
 #include <errores.h>
 #include <driver/mcpwm.h>
+#include <esp_spiffs.h>
+#include <esp_partition.h>
 
 
 #define MAC_ADDR_SIZE 6 // Cantidad de bytes de la dirección MAC.
@@ -33,6 +35,31 @@ typedef struct Dron
     void ( *updatedc )( struct Dron* );
     init_error_t ( *state )( struct Dron* );
 }Dron;
+
+
+typedef struct Flash
+{
+    /*
+    * Atributos
+    * ---------
+    * 
+    * */
+    esp_vfs_spiffs_conf_t cfg;
+    size_t total;
+    size_t used;
+
+    /*
+    * Métodos
+    * -------
+    * 
+    * */
+    void ( *spiffs_cfg )( struct Flash* );
+    void ( *spiffs_info )( struct Flash* );
+    const esp_partition_t* ( *get_partition )( struct Flash* );
+    esp_err_t ( *erase_partition )( struct Flash*, const esp_partition_t*, size_t, size_t );
+    esp_err_t ( *read )( struct Flash*, const char* );
+    int ( *write )( struct Flasgh*, const char*, int, int* );
+}Flash;
 
 
 typedef struct Joystick
