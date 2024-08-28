@@ -3,7 +3,7 @@ idf_component_register(SRCS "src/ps3.c"
                             "src/ps3_parser.c" 
                             "src/ps3_l2cap.c"
                     INCLUDE_DIRS "src/include"
-                    REQUIRES "bt" "nvs_flash")
+                    REQUIRES "bt" "nvs_flash" "estructuras" "controladores" "spiffs_partition")
 
 # Add the extra include directories
 target_include_directories(${COMPONENT_LIB} PRIVATE 

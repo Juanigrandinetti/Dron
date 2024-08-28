@@ -57,7 +57,7 @@ init_error_t joystick_init( struct Joystick *self )
 {
     new_mac( &mac );
     ESP_LOGI( TAG, "Inicializando Joystick..." );
-
+    
     mac.nvs_init( &mac );
     mac.get_mac_address( &mac );
     init_error_t set_mac = mac.set_mac_address( &mac, self->mac );

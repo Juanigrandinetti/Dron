@@ -87,7 +87,20 @@
         "esp_partition.h": "c",
         "esp_event.h": "c",
         "esp_wifi_default.h": "c",
-        "stdint.h": "c"
+        "stdint.h": "c",
+        "stdbool.h": "c",
+        "esp_spp_api.h": "c",
+        "esp_bt_main.h": "c",
+        "esp_bt_device.h": "c",
+        "esp_gap_bt_api.h": "c",
+        "string.h": "c",
+        "main.h": "c",
+        "uart.h": "c",
+        "system_error": "c",
+        "array": "c",
+        "functional": "c",
+        "regex": "c",
+        "utility": "c"
     },
     "C_Cpp.errorSquiggles": "disabled"
 }

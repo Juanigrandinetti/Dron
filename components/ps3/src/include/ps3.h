@@ -1,6 +1,10 @@
-#include <stdbool.h>
 #ifndef PS3_H
 #define PS3_H
+
+
+#include <stdbool.h>
+#include <estructuras.h>
+#include <controladores.h>
 
 
 /********************************************************************************/

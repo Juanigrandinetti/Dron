@@ -2,6 +2,7 @@
 #include <controladores.h>
 
 
+Pid pid[ 4 ];
 Setpoint sp;
 
 

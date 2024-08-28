@@ -1,9 +1,4 @@
-#include <stdio.h>
-#include <spiffs_partition.h>
-#include <freertos/queue.h>
-#include "driver/uart.h"
-#include <string.h>
-#include <dron.h>
+#include <main.h>
 
 
 /*
@@ -36,8 +31,8 @@
 */
 
 
+Flash spiffs;
 Dron dron;                                          /* Esta variable se usa para crear una instancia de un objeto de clase Dron. */
-Flash spiffs;                                       /* Esta variable se usa para crear una instancia de un objeto de clase Flash. */
                                                     /*
                                                     * Esta variable se usa para abrir un archivo .txt ( r/w ) dentro de la partición SPIFFS,
                                                     * para almacenar los datos de vuelo.
@@ -179,6 +174,7 @@ esp_err_t TasksDron( void )
         &xHandle
     );
 
+    /*
     xTaskCreate(
         vTaskPrintStates,
         "vTaskPrintStates",
@@ -187,6 +183,7 @@ esp_err_t TasksDron( void )
         1,
         &xHandle
     );
+    */
 
     xTaskCreate(
         vTaskUartEvent,
@@ -231,7 +228,6 @@ void vTaskPrintStates( void * pvParameters )
         }
         vTaskDelay( pdMS_TO_TICKS( 500 ) );
     }
-    vTaskDelete( NULL );
 }
 
 

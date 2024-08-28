@@ -12,6 +12,31 @@
 #define TAG "DRON"
 
 
+typedef struct bt_pid
+{
+                        /*
+                        * Variables de Estado
+                        * 
+                        * - z
+                        * - roll
+                        * - pitch
+                        * - yaw
+                        * 
+                        * */
+    int   estado;
+                        /*
+                        * Tipo de Acción PID
+                        * 
+                        * - p
+                        * - i
+                        * - d
+                        * 
+                        * */
+    char* pid_type;
+    char* value;        /* Nuevo valor a asignar. */
+}bt_pid;
+
+
 typedef struct Dron
 {
     /*
@@ -58,7 +83,7 @@ typedef struct Flash
     const esp_partition_t* ( *get_partition )( struct Flash* );
     esp_err_t ( *erase_partition )( struct Flash*, const esp_partition_t*, size_t, size_t );
     esp_err_t ( *read )( struct Flash*, const char* );
-    int ( *write )( struct Flasgh*, const char*, int, int* );
+    int ( *write )( struct Flash*, const char*, int, int* );
 }Flash;
 
 

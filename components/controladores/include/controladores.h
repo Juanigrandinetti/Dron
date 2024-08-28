@@ -27,6 +27,16 @@
 #define N_yaw     2 * M_PI * 1000
 
 
+                        /*
+                        * Inicializar un array con 4 objetos de clase Pid.
+                        * 
+                        * pid[0]: pid_z
+                        * pid[1]: pid_roll
+                        * pid[2]: pid_pitch
+                        * pid[3]: pid_yaw
+                        *
+                        * */
+extern Pid pid[ 4 ];
 extern Setpoint sp;
 
 

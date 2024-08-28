@@ -12,6 +12,7 @@ Joystick js;
 Mma mma;
 Hcsr04 hcsr04;
 
+
 /*
 * Inicializar un array con 4 objetos de clase Pid.
 * 
@@ -21,7 +22,7 @@ Hcsr04 hcsr04;
 * pid[3]: pid_yaw
 *
 * */
-Pid pid[ 4 ];
+// Pid pid[ 4 ];
 
 
 init_error_t dron_init( struct Dron* self )
