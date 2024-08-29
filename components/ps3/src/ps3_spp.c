@@ -8,6 +8,7 @@
 #include "nvs_flash.h"
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
+#include <freertos/semphr.h>
 #include "esp_log.h"
 #include "esp_bt.h"
 #include "esp_bt_main.h"
@@ -29,17 +30,19 @@ extern FILE* fp;
 extern Dron dron;
 extern Flash spiffs;
 extern Pid pid[ 4 ];
-TaskHandle_t xStoreInFlashHandle = NULL;
-
+extern const esp_partition_t* partition;
+TaskHandle_t xLoadToFlashHandle = NULL;
+bt_pid bt_pid_s;
 
 /********************************************************************************/
 /*              L O C A L    F U N C T I O N     P R O T O T Y P E S            */
 /********************************************************************************/
 static void ps3_spp_callback(esp_spp_cb_event_t event, esp_spp_cb_param_t *param);
 void parse_btcmd( char* data );
-void update_pid_parameters( int variable, char* pid_type, char* value );
 void vTaskLoadToFlash( void * pvParameters );
 void vTaskUpdatePIDParameters( void * pvParameters );
+void vTaskExctractFromFlash( void * pvParameters );
+void vTaskEraseFlash( void * pvParameters );
 
 
 /********************************************************************************/
@@ -222,62 +225,79 @@ void parse_btcmd( char* data )
 
     if ( strcmp( tokens[ 0 ], "pid" ) == 0 )
     {
-        bt_pid* bt_pid_s = malloc( sizeof( bt_pid ) );
-        bt_pid_s->pid_type = tokens[ 2 ];
-        bt_pid_s->value    = tokens[ 3 ];
+        bt_pid_s.pid_type = tokens[ 2 ];
+        bt_pid_s.value    = tokens[ 3 ];
 
         if ( strcmp( tokens[ 1 ], "z" ) == 0 )
-            bt_pid_s->estado = 0;
+            bt_pid_s.estado = 0;
         else
         {
             if ( strcmp( tokens[ 1 ], "roll" ) == 0 )
-                bt_pid_s->estado = 1;
+                bt_pid_s.estado = 1;
             else
             {
                 if ( strcmp( tokens[ 1 ], "pitch" ) == 0 )
-                    bt_pid_s->estado = 2;
+                    bt_pid_s.estado = 2;
                 else
                 {
                     if ( strcmp( tokens[ 1 ], "yaw" ) == 0 )
-                        bt_pid_s->estado = 3;
+                        bt_pid_s.estado = 3;
+                    else
+                        bt_pid_s.estado = -1;
                 }
             }
         }
-        xTaskCreate( vTaskUpdatePIDParameters, "vTaskUpdatePIDParameters", TASK_STACK * 2, ( void* ) bt_pid_s, 1, NULL );
-        free( bt_pid_s );
-
-        /*
-        if ( strcmp( tokens[ 1 ], "z" ) == 0 )
-            update_pid_parameters( 0, tokens[ 2 ], tokens[ 3 ] );
-        else
-        {
-            if ( strcmp( tokens[ 1 ], "roll" ) == 0 )
-                update_pid_parameters( 1, tokens[ 2 ], tokens[ 3 ] );
-            else
-            {
-                if ( strcmp( tokens[ 1 ], "pitch" ) == 0 )
-                    update_pid_parameters( 2, tokens[ 2 ], tokens[ 3 ] );
-                else
-                {
-                    if ( strcmp( tokens[ 1 ], "yaw" ) == 0 )
-                        update_pid_parameters( 3, tokens[ 2 ], tokens[ 3 ] );
-                }
-            }
-        }
-        */
+        xTaskCreate( vTaskUpdatePIDParameters, "vTaskUpdatePIDParameters", TASK_STACK * 2, NULL, 1, NULL );
     }
     else
     {
         if ( strcmp( tokens[ 0 ], "start" ) == 0 )
-            xTaskCreate( vTaskLoadToFlash, "vTaskLoadToFlash", TASK_STACK * 2, NULL, 1, &xStoreInFlashHandle );
+            xTaskCreate( vTaskLoadToFlash, "vTaskLoadToFlash", TASK_STACK * 2, NULL, 1, &xLoadToFlashHandle );
         else
         {
             if ( strcmp( tokens[ 0 ], "stop" ) == 0 )
             {
-                vTaskSuspend( xStoreInFlashHandle );
-                printf( "Tarea pausada.\n" );
+                if ( ( fp = fopen( file, "r" ) != NULL ) )
+                {
+                    vTaskDelete( xLoadToFlashHandle );
+                    printf( "Tarea pausada.\n" );
+                }
+                else
+                    ESP_LOGE( "FileSystem", "Archivo vacío." );
+            }
+            else
+            {
+                if ( strcmp( tokens[ 0 ], "send" ) == 0 )
+                    xTaskCreate( vTaskExctractFromFlash, "vTaskExctractFromFlash", TASK_STACK * 2, NULL, 1, NULL );
+                else
+                {
+                    if ( strcmp( tokens[ 0 ], "erase" ) == 0 )
+                        xTaskCreate( vTaskEraseFlash, "vTaskEraseFlash", TASK_STACK * 2, NULL, 1, NULL );
+                }
             }
         }
+    }
+}
+
+
+void vTaskExctractFromFlash( void * pvParameters )
+{
+    char stored_data[ 256 ];
+
+    while ( 1 )
+    {
+        fp = fopen( file, "r" );
+        if ( fp != NULL )
+        {
+            while ( fgets( stored_data, sizeof( stored_data ), fp ) )
+                printf( "%s", stored_data );
+            fclose( fp );
+            vTaskDelete( NULL );
+        }
+        else
+            ESP_LOGE( "FileSystem", "Error al leer el archivo .txt de la partición SPIFFS, o bien el mismo se encuentra vacío." );
+        fclose( fp );
+        vTaskDelete( NULL );
     }
 }
 
@@ -309,26 +329,24 @@ void vTaskLoadToFlash( void * pvParameters )
 
 void vTaskUpdatePIDParameters( void * pvParameters )
 {
-    bt_pid* params = ( bt_pid* ) pvParameters;
-
     while ( 1 )
     {
-        if ( strcmp( params->pid_type, "p" ) == 0 )
+        if ( strcmp( bt_pid_s.pid_type, "p" ) == 0 ) 
         {
-            pid[ params->estado ].kp = atof( params->value );
-            switch ( params->estado )
+            pid[ bt_pid_s.estado ].kp = atof( bt_pid_s.value );
+            switch ( bt_pid_s.estado )
             {
                 case 0:
-                    ESP_LOGI( TAG, "{ z } Kp: %.2f", pid[ params->estado ].kp );    
+                    ESP_LOGI( TAG, "{ z } Kp: %.2f", pid[ bt_pid_s.estado ].kp );    
                     break;
                 case 1:
-                    ESP_LOGI( TAG, "{ Roll } Kp: %.2f", pid[ params->estado ].kp );    
+                    ESP_LOGI( TAG, "{ Roll } Kp: %.2f", pid[ bt_pid_s.estado ].kp );    
                     break;
                 case 2:
-                    ESP_LOGI( TAG, "{ Pitch } Kp: %.2f", pid[ params->estado ].kp );    
+                    ESP_LOGI( TAG, "{ Pitch } Kp: %.2f", pid[ bt_pid_s.estado ].kp );    
                     break;
                 case 3:
-                    ESP_LOGI( TAG, "{ Yaw } Kp: %.2f", pid[ params->estado ].kp );
+                    ESP_LOGI( TAG, "{ Yaw } Kp: %.2f", pid[ bt_pid_s.estado ].kp );
                     break;
                 default:
                     break;
@@ -336,22 +354,22 @@ void vTaskUpdatePIDParameters( void * pvParameters )
         }
         else
         {
-            if ( strcmp( params->pid_type, "i" ) == 0 )
+            if ( strcmp( bt_pid_s.pid_type, "i" ) == 0 )
             {
-                pid[ params->estado ].ki = atof( params->value );
-                switch ( params->estado )
+                pid[ bt_pid_s.estado ].ki = atof( bt_pid_s.value );
+                switch ( bt_pid_s.estado )
                 {
                     case 0:
-                        ESP_LOGI( TAG, "{ z } Ki: %.2f", pid[ params->estado ].ki );    
+                        ESP_LOGI( TAG, "{ z } Ki: %.2f", pid[ bt_pid_s.estado ].ki );    
                         break;
                     case 1:
-                        ESP_LOGI( TAG, "{ Roll } Ki: %.2f", pid[ params->estado ].ki );    
+                        ESP_LOGI( TAG, "{ Roll } Ki: %.2f", pid[ bt_pid_s.estado ].ki );    
                         break;
                     case 2:
-                        ESP_LOGI( TAG, "{ Pitch } Ki: %.2f", pid[ params->estado ].ki );    
+                        ESP_LOGI( TAG, "{ Pitch } Ki: %.2f", pid[ bt_pid_s.estado ].ki );    
                         break;
                     case 3:
-                        ESP_LOGI( TAG, "{ Yaw } Ki: %.2f", pid[ params->estado ].ki );
+                        ESP_LOGI( TAG, "{ Yaw } Ki: %.2f", pid[ bt_pid_s.estado ].ki );
                         break;
                     default:
                         break;
@@ -359,22 +377,22 @@ void vTaskUpdatePIDParameters( void * pvParameters )
             }
             else
             {
-                if ( strcmp( params->pid_type, "d" ) == 0 )
+                if ( strcmp( bt_pid_s.pid_type, "d" ) == 0 )
                 {
-                    pid[ params->estado ].kd = atof( params->value );
-                    switch ( params->estado )
+                    pid[ bt_pid_s.estado ].kd = atof( bt_pid_s.value );
+                    switch ( bt_pid_s.estado )
                     {
                         case 0:
-                            ESP_LOGI( TAG, "{ z } Kd: %.2f", pid[ params->estado ].kd );    
+                            ESP_LOGI( TAG, "{ z } Kd: %.2f", pid[ bt_pid_s.estado ].kd ); 
                             break;
                         case 1:
-                            ESP_LOGI( TAG, "{ Roll } Kd: %.2f", pid[ params->estado ].kd );    
+                            ESP_LOGI( TAG, "{ Roll } Kd: %.2f", pid[ bt_pid_s.estado ].kd );
                             break;
                         case 2:
-                            ESP_LOGI( TAG, "{ Pitch } Kd: %.2f", pid[ params->estado ].kd );    
+                            ESP_LOGI( TAG, "{ Pitch } Kd: %.2f", pid[ bt_pid_s.estado ].kd );
                             break;
                         case 3:
-                            ESP_LOGI( TAG, "{ Yaw } Kd: %.2f", pid[ params->estado ].kd );
+                            ESP_LOGI( TAG, "{ Yaw } Kd: %.2f", pid[ bt_pid_s.estado ].kd );
                             break;
                         default:
                             break;
@@ -382,6 +400,22 @@ void vTaskUpdatePIDParameters( void * pvParameters )
                 }
             }
         }
+        vTaskDelete( NULL );
     }
-    vTaskDelete( NULL );
+}
+
+
+void vTaskEraseFlash( void * pvParameters )
+{
+    while ( 1 )
+    {
+        if ( remove( file ) == 0 )
+        {
+            ESP_LOGI( "FileSystem", "Datos borrados." );
+            cont = 0;
+        }
+        else
+            ESP_LOGE( "FileSystem", "Error al borrar los datos." );
+        vTaskDelete( NULL );
+    }
 }
