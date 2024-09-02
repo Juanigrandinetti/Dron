@@ -8,14 +8,14 @@ Setpoint sp;
 
 float get_pid( struct Pid* self, float error )
 {
-    self->_p = self->kp * error;                                              // P = kp * error.
+    self->_p = self->kp * error;                                              /* P = kp * error. */
 
     self->integral = self->integral + ( error * dt );
-    self->_i = self->integral * self->ki;                                     // I = ki * integral del error.
+    self->_i = self->integral * self->ki;                                     /* I = ki * integral del error. */
 
-    self->_d = error * ( N_z / ( 1 + ( N_z * self->integral ) ) * self->kd ); // D = kd * derivada del error.
+    self->_d = error * ( N_z / ( 1 + ( N_z * self->integral ) ) * self->kd ); /* D = kd * derivada del error. */
     
-    return ( self->_p + self->_i + self->_d );                                // Acción de control = P + I + D.
+    return ( self->_p + self->_i + self->_d );                                /* Acción de control = P + I + D. */
 }
 
 

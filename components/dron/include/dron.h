@@ -7,9 +7,12 @@
 #include <controladores.h>
 
 
-#define TRIG GPIO_NUM_26         // pin 10
-#define ECHO GPIO_NUM_25         // pin 9
-#define GPIO_PWM_00A GPIO_NUM_15 // pin 35
+#define TRIG GPIO_NUM_26         /* pin 10 */
+#define ECHO GPIO_NUM_25         /* pin 9  */
+#define GPIO_PWM_00A GPIO_NUM_15 /* pin 35 */
+#define GPIO_PWM_00B 0           /* TBD    */
+#define GPIO_PWM_01A 0           /* TBD    */
+#define GPIO_PWM_01B 0           /* TBD    */
 
 
 init_error_t dron_init( struct Dron* self );

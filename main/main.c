@@ -9,15 +9,6 @@
 
 
 #define STACK_SIZE 1024                     /* Memoria para la ejecución de tareas en paralelo. */
-                                            /*
-                                            * Máximo de muestras por variable ( 4 estados + 4 setpoints = 8 variables ).
-                                            * 
-                                            * - Tamaño de la partición SPIFFS: 956561 bytes.
-                                            * - Tamaño de cada dato: 251 bytes.
-                                            * - Cantidad de muestras por variable = [ ( 956561 /  251 )  / 8 ] = 436 datos.
-                                            * - Total de bytes usados = 436 [ datos ] * 251 [ bytes / dato ] * 8 variables = 875488 bytes.
-                                            * 
-                                            * */
 
 
 /*
@@ -73,27 +64,26 @@ void app_main( void )
     * ------------------
     * 
     * Para instanciar un objeto es necesario llamar a la función new_... de la clase que corresponda
-    * ( en este caso la clase es Dron ).
     * 
     * */
 
     new_dron( &dron );
     new_spiffs( &spiffs );
-    spiffs_init();
 
     /*
     * Inicialización
     * --------------
     *
-    *  Inicializar el objeto.
+    *  Inicializar los objetos.
+    * 
     * */
+
+    spiffs_init();
 
     if ( dron.init( &dron ) != INIT_OK )
         restart();
     else
         ESP_LOGI( TAG, "Dron inicializado." );
-
-    // btd_init();
 
     /*
     * Tareas ( RTOS ) 

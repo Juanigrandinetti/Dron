@@ -100,7 +100,8 @@
         "array": "c",
         "functional": "c",
         "regex": "c",
-        "utility": "c"
+        "utility": "c",
+        "nvs_flash.h": "c"
     },
     "C_Cpp.errorSquiggles": "disabled"
 }

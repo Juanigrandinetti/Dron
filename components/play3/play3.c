@@ -5,20 +5,13 @@
 Mac mac;
 
 
-/*
-Nombre: controller_event_cb
-
-Descripción: manejar las interrupciones asociadas
-             a eventos del joystick.
-
-Devuelve: N/A.
-*/
 void controller_event_cb( ps3_t ps3, ps3_event_t event )
 {    
     if ( ps3.analog.button.up )
     {
         sp.z = sp.z + 0.1;
         motores[ 0 ].increase_dc( &motores[ 0 ] );
+        /* dron.updatedc( &dron ); */
     }
 
     if ( ps3.analog.button.down )
@@ -26,6 +19,7 @@ void controller_event_cb( ps3_t ps3, ps3_event_t event )
         if ( sp.z - 0.1 > 0 )
             sp.z = sp.z - 0.1;
         motores[ 0 ].decrease_dc( &motores[ 0 ] );
+        /* dron.updatedc( &dron ); */
     }
     
     /*
@@ -43,16 +37,6 @@ void controller_event_cb( ps3_t ps3, ps3_event_t event )
 }
 
 
-
-/*
-Nombre: __init__
-
-Descripción: inicializa la dirección MAC del ESP32 con la dirección MAC
-             del Joystick. A su vez, establece la conexión entre el Joystick
-             y la ESP32.
-
-Devuelve: N/A.
-*/
 init_error_t joystick_init( struct Joystick *self )
 {
     new_mac( &mac );

@@ -2,27 +2,10 @@
 #include "dron.h"
 
 
-/*
-* Dirección MAC del Joystick.
-* 
-* */
-const uint8_t mac_joystick[ MAC_ADDR_SIZE ] = { 0xF0, 0xF0, 0x02, 0x43, 0x53, 0x53 };
-
-Joystick js;
-Mma mma;
-Hcsr04 hcsr04;
-
-
-/*
-* Inicializar un array con 4 objetos de clase Pid.
-* 
-* pid[0]: pid_z
-* pid[1]: pid_roll
-* pid[2]: pid_pitch
-* pid[3]: pid_yaw
-*
-* */
-// Pid pid[ 4 ];
+const uint8_t mac_joystick[ MAC_ADDR_SIZE ] = { 0xF0, 0xF0, 0x02, 0x43, 0x53, 0x53 };   /* Dirección MAC del Joystick. */
+Joystick js;                                                                            /* Variable utilizada para instanciar un objeto de clase Joystick. */
+Mma mma;                                                                                /* Variable utilizada para instanciar un objeto de clase Mma. */
+Hcsr04 hcsr04;                                                                          /* Variable utilizada para instanciar un objeto de clase Hcsr04. */
 
 
 init_error_t dron_init( struct Dron* self )
@@ -36,6 +19,9 @@ init_error_t dron_init( struct Dron* self )
     * */
 
     new_pwm( &motores[ 0 ], GPIO_PWM_00A, MCPWM_UNIT_0, MCPWM_TIMER_0, MCPWM0A );
+    /* new_pwm( &motores[ 1 ], GPIO_PWM_00B, MCPWM_UNIT_0, MCPWM_TIMER_0, MCPWM0B ); */
+    /* new_pwm( &motores[ 2 ], GPIO_PWM_01A, MCPWM_UNIT_0, MCPWM_TIMER_1, MCPWM0A ); */
+    /* new_pwm( &motores[ 3 ], GPIO_PWM_01B, MCPWM_UNIT_0, MCPWM_TIMER_1, MCPWM0B ); */
     new_hcsr04( &hcsr04, TRIG, ECHO );
     new_joystick( &js, mac_joystick );
     new_sp( &sp );

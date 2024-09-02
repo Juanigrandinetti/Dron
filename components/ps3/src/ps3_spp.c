@@ -31,7 +31,7 @@ extern Dron dron;
 extern Flash spiffs;
 extern Pid pid[ 4 ];
 extern const esp_partition_t* partition;
-TaskHandle_t xLoadToFlashHandle = NULL;
+TaskHandle_t xLoadToFlashHandler = NULL;
 bt_pid bt_pid_s;
 
 /********************************************************************************/
@@ -43,6 +43,7 @@ void vTaskLoadToFlash( void * pvParameters );
 void vTaskUpdatePIDParameters( void * pvParameters );
 void vTaskExctractFromFlash( void * pvParameters );
 void vTaskEraseFlash( void * pvParameters );
+void gpio_init( void );
 
 
 /********************************************************************************/
@@ -204,6 +205,7 @@ static void ps3_spp_callback(esp_spp_cb_event_t event, esp_spp_cb_param_t *param
 
 void parse_btcmd( char* data )
 {
+    eTaskState task_state;
     char* token;
     char* rest = data;
                                                     /* Trama PID: <Etiqueta,Variable,Tipo,Valor>
@@ -252,15 +254,25 @@ void parse_btcmd( char* data )
     else
     {
         if ( strcmp( tokens[ 0 ], "start" ) == 0 )
-            xTaskCreate( vTaskLoadToFlash, "vTaskLoadToFlash", TASK_STACK * 2, NULL, 1, &xLoadToFlashHandle );
+        {
+            if ( xLoadToFlashHandler == NULL )
+                xTaskCreate( vTaskLoadToFlash, "vTaskLoadToFlash", TASK_STACK * 2, NULL, 1, &xLoadToFlashHandler );
+            else
+            {
+                vTaskResume( xLoadToFlashHandler );
+                ESP_LOGI( "Task", "Tarea en curso." );
+            }
+        }
         else
         {
             if ( strcmp( tokens[ 0 ], "stop" ) == 0 )
             {
-                if ( ( fp = fopen( file, "r" ) != NULL ) )
+                if ( xLoadToFlashHandler != NULL )
                 {
-                    vTaskDelete( xLoadToFlashHandle );
-                    printf( "Tarea pausada.\n" );
+                    task_state = eTaskGetState( xLoadToFlashHandler );
+                    while ( !task_state );
+                    vTaskSuspend( xLoadToFlashHandler );
+                    printf( "Tarea suspendida.\n" );
                 }
                 else
                     ESP_LOGE( "FileSystem", "Archivo vacío." );
@@ -268,11 +280,32 @@ void parse_btcmd( char* data )
             else
             {
                 if ( strcmp( tokens[ 0 ], "send" ) == 0 )
-                    xTaskCreate( vTaskExctractFromFlash, "vTaskExctractFromFlash", TASK_STACK * 2, NULL, 1, NULL );
+                {
+                    if ( xLoadToFlashHandler != NULL )
+                    {
+                        task_state = eTaskGetState( xLoadToFlashHandler );
+                        while ( !task_state );
+                        vTaskSuspend( xLoadToFlashHandler );
+                        xTaskCreate( vTaskExctractFromFlash, "vTaskExctractFromFlash", TASK_STACK * 2, NULL, 1, NULL );
+                    }
+                    else
+                        ESP_LOGE( "Task", "El archivo no existe." );
+                }
                 else
                 {
                     if ( strcmp( tokens[ 0 ], "erase" ) == 0 )
-                        xTaskCreate( vTaskEraseFlash, "vTaskEraseFlash", TASK_STACK * 2, NULL, 1, NULL );
+                    {
+                        if ( xLoadToFlashHandler != NULL )
+                        {
+                            task_state = eTaskGetState( xLoadToFlashHandler );
+                            while( !task_state );
+                            vTaskDelete( xLoadToFlashHandler );
+                            xLoadToFlashHandler = NULL;
+                            xTaskCreate( vTaskEraseFlash, "vTaskEraseFlash", TASK_STACK * 2, NULL, 1, NULL );
+                        }
+                        else
+                            ESP_LOGE( "Task", "El archivo no existe." );
+                    }
                 }
             }
         }
@@ -304,26 +337,25 @@ void vTaskExctractFromFlash( void * pvParameters )
 
 void vTaskLoadToFlash( void * pvParameters )
 {
-    while ( spiffs.total - spiffs.used > SIZE_TRAMA )
+    while ( 1 )
     {
         spiffs.spiffs_info( &spiffs );
         fp = fopen( file, "a" );
         if ( fp != NULL )
         {
-            fprintf( fp, "%.2f, %.4f\n", sp.z, dron.z );
+            fprintf( fp, "%.2f,%.4f\n", sp.z, dron.z );
             printf( "Variables almacenadas en la memoria flash del sistema: %d\n", cont + 1 );
             cont++;
         }
         else
         {
             ESP_LOGE( "FileSystem", "Error al escribir el archivo .txt de la partición SPIFFS." );
-            break;
+            fclose( fp );
+            vTaskDelete( NULL );
         }
         fclose( fp );
         vTaskDelay( pdMS_TO_TICKS( 500 ) );
     }
-    ESP_LOGW( "FileSystem", "Espacio insuficiente." );
-    vTaskDelete( NULL );
 }
 
 
