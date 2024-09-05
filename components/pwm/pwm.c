@@ -30,8 +30,8 @@ init_error_t pwm_init( struct Pwm* self )
     /*
     Nombre: "mcpwm_init".
     Inicializar parámetros MCPWM.
-    mcpwm_num: elección del canal (opciones: 0/1).
-    timer_num: elección del timer  (opciones: 0/1/2), cada unidad (A/B) posee 3 timers asociados.
+    mcpwm_num: elección de la unidad (opciones: 0/1).
+    timer_num: elección del timer (opciones: 0/1/2).
     mcpwm_conf: estructura con configuraciones PWM.
     */
 
