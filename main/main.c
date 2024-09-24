@@ -103,7 +103,12 @@ void app_main( void )
         restart();
     }
     else
+    {
         ESP_LOGI( TAG, "Tareas inicializadas." );
+        gpio_set_level( 2, 0 );
+        vTaskDelay( pdMS_TO_TICKS( 500 ) );
+        gpio_set_level( 2, 1 );
+    }
 }
 
 

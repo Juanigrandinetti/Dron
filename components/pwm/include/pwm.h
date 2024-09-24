@@ -7,9 +7,9 @@
 #include <estructuras.h>
 
 
-#define MAX_DC 10    // 10% ( máxima velocidad de giro ).
-#define MIN_DC 5.8   // 5.8% ( motor apagado ).
-#define FREQUENCY 50 // Frecuencia de trabajo de los motores.
+#define MAX_DC          11.5  // 10% ( máxima velocidad de giro ).
+#define MIN_DC          7.3   // 5.8% ( motor apagado ).
+#define FREQUENCY       50    // Frecuencia de trabajo de los motores.
 
 
 extern Pwm motores[1];

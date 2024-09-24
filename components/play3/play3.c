@@ -50,6 +50,14 @@ init_error_t joystick_init( struct Joystick *self )
     ps3SetEventCallback( controller_event_cb );
     ps3SetBluetoothMacAddress( self->mac );
     ps3Init();
+    
+    /* Inicializar pin 34 GPIO 2 */
+    gpio_reset_pin( 2 );
+    gpio_set_direction( 2, GPIO_MODE_OUTPUT );
+
+    /* Setear pin 23 GPIO 2, para avisar al usuario que ya puede conectar el mando */
+    gpio_set_level( 2, 1 );
+
     while( !ps3IsConnected() )
     {
         vTaskDelay( pdMS_TO_TICKS( 10 ) );

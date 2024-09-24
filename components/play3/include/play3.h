@@ -6,6 +6,7 @@
 #include <change_mac.h>
 #include <pwm.h>
 #include <controladores.h>
+#include <driver/gpio.h>
 
 
 #define PS3_TAG "MANDO"
